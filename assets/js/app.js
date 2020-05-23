@@ -25,7 +25,7 @@ var chartGroup = svg.append("g")
   .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
 // Initialize variable
-var chosenXaxis = "age";
+var chosenXAxis = "age";
 
 // function used for updating x-scale var upon click on axis label
 function xScale(censusData, chosenXAxis) {
@@ -119,7 +119,7 @@ function updateToolTip(chosenXAxis, circlesGroup) {
     });
     
     console.log(censusData);
-    console.log(chosenXaxis);
+
     // xLinearScale function above csv import
     var xLinearScale = xScale(censusData, chosenXAxis);
 
@@ -149,9 +149,10 @@ function updateToolTip(chosenXAxis, circlesGroup) {
       .append("circle")
       .attr("cx", d => xLinearScale(d[chosenXAxis]))
       .attr("cy", d => yLinearScale(d.income))
-      .attr("r", 20)
+      .attr("r", 10)
       .attr("fill", "blue")
-      .attr("opacity", ".5");
+      .attr("opacity", ".5")
+      .text(d => d.abbr);
 
     // Create group for two x-axis labels
     var labelsGroup = chartGroup.append("g")
