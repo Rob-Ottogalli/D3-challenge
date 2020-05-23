@@ -10,7 +10,7 @@ var margin = {
 };
 
 var width = svgWidth - margin.left - margin.right;
-var height = svgHeight - margin.top - margin.bottom;
+var height = svgHeight - margin.top - margin.bottom - 20;
 
 // Create an SVG wrapper, append an SVG group that will hold our chart,
 // and shift the latter by left and top margins.
@@ -59,26 +59,37 @@ function renderCircles(circlesGroup, newXScale, chosenXAxis) {
     .duration(1000)
     .attr("cx", d => newXScale(d[chosenXAxis]));
 
+  // circlesGroup.append("text")
+  //   .attr({
+  //     "text-anchor": "middle",
+  //     "font-size": 5,
+  //     "font-color": "white"
+  //   })
+  //   .text(d=>d.abbr);
+
   return circlesGroup;
 }
 
 // function used for updating circles group with new tooltip
 function updateToolTip(chosenXAxis, circlesGroup) {
 
-  var label;
+  var xlabel;
 
   if (chosenXAxis === "age") {
-    label = "Age:";
+    xlabel = "Age (years):";
+  }
+  else if (chosenXAxis === "healthcare") {
+    xlabel = "No Healthcare (%):";
   }
   else {
-    label = "Income:";
+    xlabel = "Obese (%):";
   }
 
   var toolTip = d3.tip()
     .attr("class", "tooltip")
-    .offset([80, -60])
+    .offset([40, 60])
     .html(function(d) {
-      return (`${d.state}<br>${label} ${d[chosenXAxis]}`);
+      return (`${d.state}<br>${xlabel} ${d[chosenXAxis]}`);
     });
 
   circlesGroup.call(toolTip);
@@ -118,8 +129,6 @@ function updateToolTip(chosenXAxis, circlesGroup) {
       data.smokesHigh = +data.smokesHigh;
     });
     
-    console.log(censusData);
-
     // xLinearScale function above csv import
     var xLinearScale = xScale(censusData, chosenXAxis);
 
@@ -143,7 +152,7 @@ function updateToolTip(chosenXAxis, circlesGroup) {
       .call(leftAxis);
 
     // append initial circles
-    var circlesGroup = chartGroup.selectAll("circle")
+    var circlesGroup = chartGroup.selectAll("g circle")
       .data(censusData)
       .enter()
       .append("circle")
@@ -151,23 +160,34 @@ function updateToolTip(chosenXAxis, circlesGroup) {
       .attr("cy", d => yLinearScale(d.income))
       .attr("r", 10)
       .attr("fill", "blue")
-      .attr("opacity", ".5")
-      .text(d => d.abbr);
+      .attr("opacity", ".5");
+    
+    circlesGroup.append("text")
+	    .attr("dx", 5)
+	    .text(function(d){return d.abbr})
 
     // Create group for two x-axis labels
     var labelsGroup = chartGroup.append("g")
-      .attr("transform", `translate(${width / 2}, ${height + 20})`);
+      .attr("transform", `translate(${width / 2}, ${height + 30})`);
 
     var ageLabel = labelsGroup.append("text")
       .attr("x", 0)
       .attr("y", 20)
       .attr("value", "age") // value to grab for event listener
       .classed("active", true)
-      .text("Age (years)");
+      .text("Age (Median)");
+
+
+    var healthcareLabel = labelsGroup.append("text")
+      .attr("x", 0)
+      .attr("y", 40)
+      .attr("value", "healthcare") // value to grab for event listener
+      .classed("inactive", true)
+      .text("Lacks Healthcare (%)");      
 
     var obesityLabel = labelsGroup.append("text")
       .attr("x", 0)
-      .attr("y", 40)
+      .attr("y", 60)
       .attr("value", "obesity") // value to grab for event listener
       .classed("inactive", true)
       .text("Obesity (%)");
@@ -214,17 +234,34 @@ function updateToolTip(chosenXAxis, circlesGroup) {
             obesityLabel
               .classed("active", true)
               .classed("inactive", false);
-              ageLabel
+            ageLabel
               .classed("active", false)
               .classed("inactive", true);
+            healthcareLabel
+              .classed("active", false)
+              .classed("inactive", true);
+          }
+          else if (chosenXAxis === "healthcare") {
+            obesityLabel
+              .classed("active", false)
+              .classed("inactive", true);
+            ageLabel
+              .classed("active", false)
+              .classed("inactive", true);
+            healthcareLabel
+              .classed("active", true)
+              .classed("inactive", false);
           }
           else {
             obesityLabel
               .classed("active", false)
               .classed("inactive", true);
-              ageLabel
+            ageLabel
               .classed("active", true)
               .classed("inactive", false);
+            healthcareLabel
+              .classed("active", false)
+              .classed("inactive", true);
           }
         }
       });
