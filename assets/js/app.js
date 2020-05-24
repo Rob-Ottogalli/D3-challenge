@@ -24,8 +24,10 @@ var svg = d3
 var chartGroup = svg.append("g")
   .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
+// Initial Parameters
 // Initialize variable
 var chosenXAxis = "age";
+var chosenYAxis = "income"
 
 // function used for updating x-scale var upon click on axis label
 function xScale(censusData, chosenXAxis) {
@@ -40,8 +42,21 @@ function xScale(censusData, chosenXAxis) {
 
 }
 
+// function used for updating y-scale var upon click on axis label
+function yScale(censusData, chosenYAxis) {
+  // create scales
+  var yLinearScale = d3.scaleLinear()
+    .domain([d3.min(censusData, d => d[chosenYAxis]) * 0.8,
+      d3.max(censusData, d => d[chosenYAxis]) * 1.2
+    ])
+    .range([height, 0]);
+
+  return yLinearScale;
+
+}
+
 // function used for updating xAxis var upon click on axis label
-function renderAxes(newXScale, xAxis) {
+function renderXAxes(newXScale, xAxis) {
   var bottomAxis = d3.axisBottom(newXScale);
 
   xAxis.transition()
@@ -51,13 +66,25 @@ function renderAxes(newXScale, xAxis) {
   return xAxis;
 }
 
+// function used for updating xAxis var upon click on axis label
+function renderYAxes(newYScale, yAxis) {
+  var leftAxis = d3.axisBottom(newYScale);
+
+  yAxis.transition()
+    .duration(1000)
+    .call(leftAxis);
+
+  return yAxis;
+}
+
 // function used for updating circles group with a transition to
 // new circles
-function renderCircles(circlesGroup, newXScale, chosenXAxis) {
+function renderCircles(circlesGroup, newXScale, newYScale, chosenXAxis, chosenYAxis) {
 
   circlesGroup.transition()
     .duration(1000)
-    .attr("cx", d => newXScale(d[chosenXAxis]));
+    .attr("cx", d => newXScale(d[chosenXAxis]))
+    .attr("cy", d => newYScale(d[chosenYAxis]));
 
   // circlesGroup.append("text")
   //   .attr({
@@ -71,9 +98,10 @@ function renderCircles(circlesGroup, newXScale, chosenXAxis) {
 }
 
 // function used for updating circles group with new tooltip
-function updateToolTip(chosenXAxis, circlesGroup) {
+function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
 
   var xlabel;
+  var ylabel;
 
   if (chosenXAxis === "age") {
     xlabel = "Age (years):";
@@ -85,11 +113,17 @@ function updateToolTip(chosenXAxis, circlesGroup) {
     xlabel = "Obese (%):";
   }
 
+  if (chosenYAxis === "income") {
+    ylabel = "Income:"
+  }
+
   var toolTip = d3.tip()
     .attr("class", "tooltip")
     .offset([40, 60])
     .html(function(d) {
-      return (`${d.state}<br>${xlabel} ${d[chosenXAxis]}`);
+      return (`${d.state}
+              <hr>${xlabel} ${d[chosenXAxis]}
+              <br>${ylabel} ${d[chosenYAxis]}`);
     });
 
   circlesGroup.call(toolTip);
@@ -133,9 +167,7 @@ function updateToolTip(chosenXAxis, circlesGroup) {
     var xLinearScale = xScale(censusData, chosenXAxis);
 
     // Create y scale function
-    var yLinearScale = d3.scaleLinear()
-    .domain([0, d3.max(censusData, d => d.income)])
-    .range([height, 0]);
+    var yLinearScale = yScale(censusData, chosenYAxis);
 
     // Create initial axis functions
     var bottomAxis = d3.axisBottom(xLinearScale);
@@ -148,7 +180,9 @@ function updateToolTip(chosenXAxis, circlesGroup) {
       .call(bottomAxis);
 
     // append y axis
-    chartGroup.append("g")
+    var yAxis = chartGroup.append("g")
+      .classed("y-axis", true)
+      // .attr("transform")
       .call(leftAxis);
 
     // append initial circles
@@ -157,7 +191,7 @@ function updateToolTip(chosenXAxis, circlesGroup) {
       .enter()
       .append("circle")
       .attr("cx", d => xLinearScale(d[chosenXAxis]))
-      .attr("cy", d => yLinearScale(d.income))
+      .attr("cy", d => yLinearScale(d[chosenYAxis]))
       .attr("r", 10)
       .attr("fill", "blue")
       .attr("opacity", ".5");
@@ -166,26 +200,25 @@ function updateToolTip(chosenXAxis, circlesGroup) {
 	    .attr("dx", 5)
 	    .text(function(d){return d.abbr})
 
-    // Create group for two x-axis labels
-    var labelsGroup = chartGroup.append("g")
+    // Create group for three x-axis labels
+    var xLabelsGroup = chartGroup.append("g")
       .attr("transform", `translate(${width / 2}, ${height + 30})`);
 
-    var ageLabel = labelsGroup.append("text")
+    var ageLabel = xLabelsGroup.append("text")
       .attr("x", 0)
       .attr("y", 20)
       .attr("value", "age") // value to grab for event listener
       .classed("active", true)
       .text("Age (Median)");
 
-
-    var healthcareLabel = labelsGroup.append("text")
+    var healthcareLabel = xLabelsGroup.append("text")
       .attr("x", 0)
       .attr("y", 40)
       .attr("value", "healthcare") // value to grab for event listener
       .classed("inactive", true)
       .text("Lacks Healthcare (%)");      
 
-    var obesityLabel = labelsGroup.append("text")
+    var obesityLabel = xLabelsGroup.append("text")
       .attr("x", 0)
       .attr("y", 60)
       .attr("value", "obesity") // value to grab for event listener
@@ -202,17 +235,17 @@ function updateToolTip(chosenXAxis, circlesGroup) {
       .text("Income ($)");
 
     // updateToolTip function above csv import
-    var circlesGroup = updateToolTip(chosenXAxis, circlesGroup);
+    var circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
 
     // x axis labels event listener
-    labelsGroup.selectAll("text")
+    xLabelsGroup.selectAll("text")
       .on("click", function() {
         // get value of selection
-        var value = d3.select(this).attr("value");
-        if (value !== chosenXAxis) {
+        var xValue = d3.select(this).attr("value");
+        if (xValue !== chosenXAxis) {
 
           // replaces chosenXAxis with value
-          chosenXAxis = value;
+          chosenXAxis = xValue;
 
           console.log(chosenXAxis)
 
@@ -221,7 +254,7 @@ function updateToolTip(chosenXAxis, circlesGroup) {
           xLinearScale = xScale(censusData, chosenXAxis);
 
           // updates x axis with transition
-          xAxis = renderAxes(xLinearScale, xAxis);
+          xAxis = renderXAxes(xLinearScale, xAxis);
 
           // updates circles with new x values
           circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis);
