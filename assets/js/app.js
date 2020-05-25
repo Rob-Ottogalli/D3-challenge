@@ -97,6 +97,27 @@ function renderYCircles(circlesGroup, newYScale, chosenYAxis) {
   return circlesGroup;
 }
 
+
+// function used for updating Circle Text group with a transition to
+// new circles
+function renderXCircleText(textCircles, newXScale, chosenXAxis) {
+
+  textCircles.transition()
+    .duration(1000)
+    .attr("x", d => newXScale(d[chosenXAxis]));
+
+  return textCircles;
+}
+
+function renderYCircleText(textCircles, newYScale, chosenYAxis) {
+
+  textCircles.transition()
+    .duration(1000)
+    .attr("y", d => newYScale(d[chosenYAxis])+4);
+
+  return textCircles;
+}
+
 // function used for updating circles group with new tooltip
 function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
 
@@ -104,18 +125,18 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
   var ylabel;
 
   if (chosenXAxis === "smokes") {
-    xlabel = "Smokers (%):"
+    xlabel = "Smokers:"
   }
   else if (chosenXAxis === "healthcare") {
     xlabel = "No Healthcare:"
   }
   else {
-    xlabel = "Obese (%):";
+    xlabel = "Obese:";
   }
 
 
   if (chosenYAxis === "age") {
-    ylabel = "Age (years):"
+    ylabel = "Age:"
   }
   else if (chosenYAxis === "income") {
     ylabel = "Income:"
@@ -193,7 +214,7 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
       .call(leftAxis);
 
     // append initial circles
-    var circlesGroup = chartGroup.selectAll("circle text")
+    var circlesGroup = chartGroup.selectAll("circle")
       .data(censusData)
       .enter()
       .append("circle")
@@ -202,15 +223,19 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
       .attr("r", 10)
       .attr("fill", "blue")
       .attr("opacity", ".5");
-      // .append("text")
-      // .attr("cx", d => xLinearScale(d[chosenXAxis]))
-      // .attr("cy", d => yLinearScale(d[chosenYAxis]))      
-      // .text(d => d.abbr)
-      // .attr("font-family", "sans-serif")
-      // .attr("text-anchor", "middle")
-      // .attr("font-size", "10px")
-      // .attr("fill", "black")
-      // .classed("active", true);
+
+    var textCircles = chartGroup.selectAll("text")
+      .data(censusData)
+      .enter()
+      .append("text")
+      .attr("x", d => xLinearScale(d[chosenXAxis]))
+      .attr("y", d => yLinearScale(d[chosenYAxis])+4)      
+      .text(d => d.abbr)
+      .attr("font-family", "sans-serif")
+      .attr("text-anchor", "middle")
+      .attr("font-size", "10px")
+      .attr("fill", "white")
+      .classed("active", true);
 
     // Create group for three x-axis labels
     var xLabelsGroup = chartGroup.append("g")
@@ -282,8 +307,9 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
           // updates x axis with transition
           xAxis = renderXAxes(xLinearScale, xAxis);
 
-          // updates circles with new x values
+          // updates circles and circle text with new x values
           circlesGroup = renderXCircles(circlesGroup, xLinearScale, chosenXAxis);
+          textCircles = renderXCircleText(textCircles, xLinearScale, chosenXAxis);
 
           // updates tooltips with new info
           circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
@@ -342,8 +368,9 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
           // updates x axis with transition
           yAxis = renderYAxes(yLinearScale, yAxis);
 
-          // updates circles with new x values
+          // updates circles and circle text with new y values
           circlesGroup = renderYCircles(circlesGroup, yLinearScale, chosenYAxis);
+          textCircles = renderYCircleText(textCircles, yLinearScale, chosenYAxis);
 
           // updates tooltips with new info
           circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
@@ -383,5 +410,6 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
               .classed("inactive", true);
           }
         }
-      });      
+      });
+    console.log(censusData);
 })()
