@@ -9,7 +9,7 @@ var margin = {
   left: 100
 };
 
-var width = svgWidth - margin.left - margin.right;
+var width = svgWidth - margin.left - margin.right + 20;
 var height = svgHeight - margin.top - margin.bottom - 20;
 
 // Create an SVG wrapper, append an SVG group that will hold our chart,
@@ -26,8 +26,8 @@ var chartGroup = svg.append("g")
 
 // Initial Parameters
 // Initialize variable
-var chosenXAxis = "age";
-var chosenYAxis = "income";
+var chosenXAxis = "smokes";
+var chosenYAxis = "age";
 
 // function used for updating x-scale var upon click on axis label
 function xScale(censusData, chosenXAxis) {
@@ -46,7 +46,9 @@ function xScale(censusData, chosenXAxis) {
 function yScale(censusData, chosenYAxis) {
   // create scales
   var yLinearScale = d3.scaleLinear()
-    .domain([0, d3.max(censusData, d => d[chosenYAxis]) * 1.2])
+    .domain([d3.min(censusData, d => d[chosenYAxis]) * 0.8,
+    d3.max(censusData, d => d[chosenYAxis]) * 1.2
+    ])
     .range([height, 0]);
 
   return yLinearScale;
@@ -101,21 +103,22 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
   var xlabel;
   var ylabel;
 
-  if (chosenXAxis === "age") {
-    xlabel = "Age (years):";
+  if (chosenXAxis === "smokes") {
+    xlabel = "Smokers (%):"
   }
   else if (chosenXAxis === "healthcare") {
-    xlabel = "No Healthcare (%):";
+    xlabel = "No Healthcare:"
   }
   else {
     xlabel = "Obese (%):";
   }
 
-  if (chosenYAxis === "income") {
-    ylabel = "Income:"
+
+  if (chosenYAxis === "age") {
+    ylabel = "Age (years):"
   }
-  else if (chosenYAxis === "smokes") {
-    ylabel = "Smokers (%):"
+  else if (chosenYAxis === "income") {
+    ylabel = "Income:"
   }
   else {
     ylabel = "Poverty:"
@@ -125,8 +128,8 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
     .attr("class", "tooltip")
     .offset([40, 60])
     .html(function(d) {
-      return (`${d.state}
-              <hr>${xlabel} ${d[chosenXAxis]}
+      return (`<strong>${d.state}</strong>
+              <br>${xlabel} ${d[chosenXAxis]}
               <br>${ylabel} ${d[chosenYAxis]}`);
     });
 
@@ -208,12 +211,12 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
     var xLabelsGroup = chartGroup.append("g")
       .attr("transform", `translate(${width / 2}, ${height + 30})`);
 
-    var ageLabel = xLabelsGroup.append("text")
+    var smokesLabel = xLabelsGroup.append("text")
       .attr("x", 0)
       .attr("y", 20)
-      .attr("value", "age") // value to grab for event listener
+      .attr("value", "smokes")
       .classed("active", true)
-      .text("Age (Median)");
+      .text("Smokers (%)");
 
     var healthcareLabel = xLabelsGroup.append("text")
       .attr("x", 0)
@@ -232,23 +235,23 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
     // Create group for three x-axis labels
     var yLabelsGroup = chartGroup.append("g")
       .attr("transform", "rotate(-90)");
-    
+
+    var ageLabel = yLabelsGroup.append("text")
+      .attr("y", 0 - margin.left + 15)
+      .attr("x", 0 - (height / 2))      
+      .attr("value", "age") // value to grab for event listener
+      .classed("active", true)
+      .text("Age (Median)");
+
     var incomeLabel = yLabelsGroup.append("text")
-      .attr("y", 0 - margin.left + 20)
+      .attr("y", 0 - margin.left + 35)
       .attr("x", 0 - (height / 2))
       .attr("value", "income")
-      .classed("active", true)
-      .text("Income ($)");
-
-    var smokesLabel = yLabelsGroup.append("text")
-      .attr("y", 0 - margin.left + 40)
-      .attr("x", 0 - (height / 2))
-      .attr("value", "smokes")
       .classed("inactive", true)
-      .text("Smokers (%)");
+      .text("Houshold Income (Median)");
 
     var povertyLabel = yLabelsGroup.append("text")
-      .attr("y", 0 - margin.left + 60)
+      .attr("y", 0 - margin.left + 55)
       .attr("x", 0 - (height / 2))
       .attr("value", "poverty")
       .classed("inactive", true)
@@ -266,8 +269,6 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
 
           // replaces chosenXAxis with value
           chosenXAxis = xValue;
-
-          console.log(chosenXAxis)
 
           // functions here found above csv import
           // updates x scale for new data
@@ -287,7 +288,7 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
             obesityLabel
               .classed("active", true)
               .classed("inactive", false);
-            ageLabel
+            smokesLabel
               .classed("active", false)
               .classed("inactive", true);
             healthcareLabel
@@ -298,7 +299,7 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
             obesityLabel
               .classed("active", false)
               .classed("inactive", true);
-            ageLabel
+            smokesLabel
               .classed("active", false)
               .classed("inactive", true);
             healthcareLabel
@@ -309,7 +310,7 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
             obesityLabel
               .classed("active", false)
               .classed("inactive", true);
-            ageLabel
+            smokesLabel
               .classed("active", true)
               .classed("inactive", false);
             healthcareLabel
@@ -329,8 +330,6 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
           // replaces chosenXAxis with value
           chosenYAxis = yValue;
 
-          console.log(chosenYAxis)
-
           // functions here found above csv import
           // updates x scale for new data
           yLinearScale = yScale(censusData, chosenYAxis);
@@ -349,7 +348,7 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
             incomeLabel
               .classed("active", true)
               .classed("inactive", false);
-            smokesLabel
+            ageLabel
               .classed("active", false)
               .classed("inactive", true);
             povertyLabel
@@ -360,7 +359,7 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
             incomeLabel
               .classed("active", false)
               .classed("inactive", true);
-            smokesLabel
+            ageLabel
               .classed("active", false)
               .classed("inactive", true);
             povertyLabel
@@ -371,7 +370,7 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
             incomeLabel
               .classed("active", false)
               .classed("inactive", true);
-            smokesLabel
+            ageLabel
               .classed("active", true)
               .classed("inactive", false);
             povertyLabel

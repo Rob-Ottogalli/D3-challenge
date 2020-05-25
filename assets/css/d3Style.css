@@ -43,9 +43,11 @@
 .d3-tip {
   padding: 6px;
   font-size: 12px;
+  box-sizing: border-box;
+  display: inline;
   line-height: 1;
   line-height: 1.5em;
-  color: #fff;
+  color: #98e2ec;
   text-align: center;
   text-transform: capitalize;
   background: rgba(0, 0, 0, 0.8);
