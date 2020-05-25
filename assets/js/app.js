@@ -214,7 +214,8 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
       .call(leftAxis);
 
     // append initial circles
-    var circlesGroup = chartGroup.selectAll("circle")
+    var circlesGroup = chartGroup.append("g")
+      .selectAll("circle")
       .data(censusData)
       .enter()
       .append("circle")
@@ -225,7 +226,8 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
       .attr("opacity", ".6");
 
     console.log(censusData);
-    var textCircles = chartGroup.selectAll("text")
+    var textCircles = chartGroup.append("g")
+      .selectAll("text")
       .data(censusData)
       .enter()
       .append("text")
