@@ -222,20 +222,21 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
       .attr("cy", d => yLinearScale(d[chosenYAxis]))
       .attr("r", 10)
       .attr("fill", "blue")
-      .attr("opacity", ".5");
+      .attr("opacity", ".6");
 
+    console.log(censusData);
     var textCircles = chartGroup.selectAll("text")
       .data(censusData)
       .enter()
       .append("text")
-      .attr("x", d => xLinearScale(d[chosenXAxis]))
-      .attr("y", d => yLinearScale(d[chosenYAxis])+4)      
       .text(d => d.abbr)
+      .attr("x", d => xLinearScale(d[chosenXAxis]))
+      .attr("y", d => yLinearScale(d[chosenYAxis])+4)
       .attr("font-family", "sans-serif")
       .attr("text-anchor", "middle")
       .attr("font-size", "10px")
-      .attr("fill", "white")
-      .classed("active", true);
+      .style("fill", "white")
+      .attr("font-weight", "bold");
 
     // Create group for three x-axis labels
     var xLabelsGroup = chartGroup.append("g")
@@ -411,5 +412,4 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
           }
         }
       });
-    console.log(censusData);
 })()

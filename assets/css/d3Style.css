@@ -40,17 +40,17 @@
   margin: 0;
 }
 
-.d3-tip {
+.tooltip {
   padding: 6px;
   font-size: 12px;
   box-sizing: border-box;
   display: inline;
   line-height: 1;
   line-height: 1.5em;
-  color: #98e2ec;
+  color: white;
   text-align: center;
   text-transform: capitalize;
-  background: rgba(0, 0, 0, 0.8);
+  background: black;
   border-radius: 4px;
 }
 
