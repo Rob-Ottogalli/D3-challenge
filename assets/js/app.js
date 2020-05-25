@@ -193,7 +193,7 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
       .call(leftAxis);
 
     // append initial circles
-    var circlesGroup = chartGroup.selectAll("g circle")
+    var circlesGroup = chartGroup.selectAll("circle text")
       .data(censusData)
       .enter()
       .append("circle")
@@ -202,10 +202,15 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
       .attr("r", 10)
       .attr("fill", "blue")
       .attr("opacity", ".5");
-    
-    // circlesGroup.append("text")
-	  //   .attr("dx", 5)
-	  //   .text(function(d){return d.abbr})
+      // .append("text")
+      // .attr("cx", d => xLinearScale(d[chosenXAxis]))
+      // .attr("cy", d => yLinearScale(d[chosenYAxis]))      
+      // .text(d => d.abbr)
+      // .attr("font-family", "sans-serif")
+      // .attr("text-anchor", "middle")
+      // .attr("font-size", "10px")
+      // .attr("fill", "black")
+      // .classed("active", true);
 
     // Create group for three x-axis labels
     var xLabelsGroup = chartGroup.append("g")
