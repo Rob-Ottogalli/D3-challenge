@@ -171,7 +171,7 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
 (async function(){
     var censusData = await d3.csv("assets/data/data.csv").catch(err => console.log(err))
     
-    // Parse data
+    // Parse data. Convert CSV data to integers
     censusData.forEach(function(data) {
       data.id = +data.id;
       data.poverty = +data.poverty;
@@ -225,7 +225,7 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
       .attr("fill", "blue")
       .attr("opacity", ".6");
 
-    console.log(censusData);
+    // append text (state abbreviation) to inside of circles 
     var textCircles = chartGroup.append("g")
       .selectAll("text")
       .data(censusData)
